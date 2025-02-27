@@ -1,6 +1,6 @@
 const express = require('express');
 const mysql = require('mysql2');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 require("dotenv/config")
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -147,7 +147,7 @@ app.get("/api/list", (req, res) => {
 
 
 app.get("/api/search/:search", (req, res) => {
-    const search = req.params.search.trim(); // Ensure no extra spaces
+    const search = req.params.search.trim();
 
     if (!search) {
         return res.status(400).json({ message: "Search query cannot be empty" });
