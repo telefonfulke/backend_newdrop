@@ -257,7 +257,7 @@ function authenticateToken(req, res, next) {
 
 app.get("/api/profile", authenticateToken, (req, res) => {
     const user_id = req.user.id;
-    const sql = "SELECT * FROM users WHERE user_id = ?";
+    const sql = "SELECT * FROM users WHERE id = ?";
     console.log("User ID from token:", user_id);
 
     pool.query(sql, [user_id], (err, result) => {
