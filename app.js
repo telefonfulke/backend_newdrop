@@ -253,6 +253,20 @@ function authenticateToken(req, res, next) {
     });
 }
 
+
+
+document.addEventListener('DOMContentLoaded', getProfile);
+
+app.get('/api/profile', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Nem vagy bejelentkezve!' });
+    }
+
+    const user = req.session.user;
+    res.json({ name: user.name, email: user.email });
+});
+
+
 //regisztracio
 app.post('/api/register', (req, res) => {
     const { email, name, password } = req.body;
@@ -336,12 +350,6 @@ app.post('/api/login', (req, res) => {
         });
     });
 });
-
-
-
-//search 
-
-
 
 
 
