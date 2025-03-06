@@ -262,8 +262,19 @@ app.get('/api/profile', async (req, res) => {
         return res.status(401).json({ error: 'Nem vagy bejelentkezve!' });
     }
 
-    const user = req.session.user;
-    res.json({ name: user.name, email: user.email });
+    try {
+        const userId = req.session.user.id;
+        const [user] = await db.query("SELECT name, email FROM users WHERE id = ?", [userId]);
+
+        if (!user) {
+            return res.status(404).json({ error: "Felhasználó nem található" });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Szerverhiba" });
+    }
 });
 
 
