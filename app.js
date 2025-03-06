@@ -257,24 +257,15 @@ function authenticateToken(req, res, next) {
 
 document.addEventListener('DOMContentLoaded', getProfile);
 
-app.get('/api/profile', async (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ error: 'Nem vagy bejelentkezve!' });
-    }
-
-    try {
-        const userId = req.session.user.id;
-        const [user] = await db.query("SELECT name, email FROM users WHERE id = ?", [userId]);
-
-        if (!user) {
-            return res.status(404).json({ error: "Felhasználó nem található" });
-        }
-
-        res.json(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Szerverhiba" });
-    }
+app.get("/api/Profile", authenticateToken, (req, res) => {
+    const user_id = req.user.id;
+    const sql = "SELECT * FROM users WHERE user_id = ?";
+    console.log(user_id);
+    pool.query(sql, [user_id], (err, result) => {
+        if (err) return res.status(500).json({ error: err });
+        if (result.length === 0) return res.status(404).json({ message: "User not found" });
+        return res.json(result);
+    });
 });
 
 
