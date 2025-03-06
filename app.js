@@ -265,6 +265,16 @@ function authenticateToken(req, res, next) {
     });
 }
 
+jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) {
+        console.error('Token verification error:', err);
+        return res.sendStatus(403); // Token is invalid or expired
+    }
+    console.log('Token is valid for user:', user);
+    req.user = user;
+    next();
+});
+
 
 app.get("/api/profile", authenticateToken, (req, res) => {
     const user_id = req.user.id;
