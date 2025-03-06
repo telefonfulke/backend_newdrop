@@ -253,19 +253,37 @@ function authenticateToken(req, res, next) {
     });
 }
 
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token == null) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+}
 
 
 app.get("/api/profile", authenticateToken, (req, res) => {
     const user_id = req.user.id;
     const sql = "SELECT * FROM users WHERE user_id = ?";
-    console.log(user_id);
+    console.log("User ID from token:", user_id);
+
     pool.query(sql, [user_id], (err, result) => {
-        if (err) return res.status(500).json({ error: err });
-        if (result.length === 0) return res.status(404).json({ message: "User not found" });
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        if (result.length === 0) {
+            console.log("User not found for ID:", user_id);
+            return res.status(404).json({ message: "User not found" });
+        }
+        console.log("User found:", result);
         return res.json(result);
     });
 });
-
 
 //regisztracio
 app.post('/api/register', (req, res) => {
