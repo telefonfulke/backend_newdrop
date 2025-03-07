@@ -258,6 +258,7 @@ function authenticateToken(req, res, next) {
 
 app.get("/api/profile", authenticateToken, (req, res) => {
     const user_id = req.user.id;
+    console.log(user_id);
     const sql = "SELECT * FROM users WHERE id = ?";
     console.log("User ID from token:", user_id);
 
@@ -347,7 +348,7 @@ app.post('/api/login', (req, res) => {
                 res.cookie('auth_token', token, {
                     httpOnly: true,
                     secure: true,
-                    sameSite: 'none',
+                    sameSite: 'lax',
                     maxAge: 1000 * 60 * 60 * 24 * 30 * 12
                 });
 
@@ -366,7 +367,7 @@ app.post('/api/logout', authenticateToken, (req, res) => {
     res.clearCookie('auth_token', {
         httpOnly: true,
         secure: true,
-        sameSite: 'none'
+        sameSite: 'lax'
     });
     return res.status(200).json({ message: 'Kijelentkezve!' });
 });
