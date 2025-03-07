@@ -347,7 +347,7 @@ app.post('/api/login', (req, res) => {
         console.log(user);
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (isMatch) {
-                const token = jwt.sign({ id: user.user_id }, JWT_SECRET, { expiresIn: '1y' });
+                const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1y' });
 
                 res.cookie('auth_token', token, {
                     httpOnly: true,
