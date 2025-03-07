@@ -253,7 +253,7 @@ function authenticateToken(req, res, next) {
             return res.status(403).json({ error: 'Van token, csak épp nem érvényes' });
         }
         req.user = user;
-        console.log(`req.user: ${req.user}, user: ${user}`);
+        console.log(`req.user: ${JSON.stringify(req.user, null, 2)}, user: ${JSON.stringify(user, null, 2)}`);
         next();
     });
 }
