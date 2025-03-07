@@ -243,14 +243,17 @@ function authenticateToken(req, res, next) {
     console.log(req.headers);
     const token = req.cookies.auth_token;
     if (!token) {
+        console.log('nincs token');
         return res.status(403).json({ error: 'Nincs token' });
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
+            console.log(`van token de nem érvényes: ${err}`);
             return res.status(403).json({ error: 'Van token, csak épp nem érvényes' });
         }
         req.user = user;
+        console.log(req.user);
         next();
     });
 }
