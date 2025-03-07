@@ -240,6 +240,7 @@ app.get("/api/getitem", (req, res) => {
 const JWT_SECRET = process.env.JWT_SECRET;
 
 function authenticateToken(req, res, next) {
+    console.log(req.headers);
     const token = req.cookies.auth_token;
     if (!token) {
         return res.status(403).json({ error: 'Nincs token' });
