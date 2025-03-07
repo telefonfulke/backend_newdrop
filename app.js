@@ -253,7 +253,7 @@ function authenticateToken(req, res, next) {
             return res.status(403).json({ error: 'Van token, csak épp nem érvényes' });
         }
         req.user = user;
-        console.log(req.user);
+        console.log(`req.user: ${req.user}, user: ${user}`);
         next();
     });
 }
@@ -344,6 +344,7 @@ app.post('/api/login', (req, res) => {
         }
 
         const user = result[0];
+        console.log(user);
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (isMatch) {
                 const token = jwt.sign({ id: user.user_id }, JWT_SECRET, { expiresIn: '1y' });
