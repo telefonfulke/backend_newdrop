@@ -392,28 +392,26 @@ const client = new Client({
 const ordersController = new OrdersController(client);
 const paymentsController = new PaymentsController(client);
 
-const createOrder = async (cart) => {
-    const collect = {
-        body: {
-            intent: "CAPTURE",
-            purchaseUnits: [{
-                amount: {
-                    currencyCode: "USD",
-                    value: "100",
-                },
-            }],
-        },
-        prefer: "return=minimal",
-    };
+const createOrder = async (req, res) => {
     try {
-        const { body, ...httpResponse } = await ordersController.ordersCreate(collect);
-        return { jsonResponse: JSON.parse(body), httpStatusCode: httpResponse.statusCode };
-    } catch (error) {
-        if (error instanceof ApiError) {
-            throw new Error(error.message);
+        const { amount } = req.body;
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ error: "Érvénytelen összeg!" });
         }
+
+        const order = {
+            intent: "CAPTURE",
+            purchase_units: [{ amount: { currency_code: "HUF", value: amount.toString() } }]
+        };
+
+        const response = await ordersController.ordersCreate({ body: order });
+        res.status(200).json(response.jsonResponse);
+    } catch (error) {
+        console.error("Hiba a rendelés létrehozásakor:", error);
+        res.status(500).json({ error: "Hiba történt a rendelés során." });
     }
 };
+
 
 app.post("/api/orders", async (req, res) => {
     try {
