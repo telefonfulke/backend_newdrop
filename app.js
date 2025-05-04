@@ -269,22 +269,48 @@ function authenticateToken(req, res, next) {
 
 
 app.get("/api/profile", authenticateToken, (req, res) => {
-    const user_id = req.user.id;
-    console.log(user_id);
-    const sql = "SELECT * FROM users WHERE id = ?";
-    console.log("User ID from token:", user_id);
-
-    pool.query(sql, [user_id], (err, result) => {
+    const userId = req.user.id;
+    const sql = 'SELECT name, email FROM users WHERE id = ?';
+    
+    pool.query(sql, [userId], (err, result) => {
         if (err) {
-            console.error("Database error:", err);
-            return res.status(500).json({ error: "Database error" });
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Error fetching profile data' });
         }
+        
         if (result.length === 0) {
-            console.log("User not found for ID:", user_id);
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: 'User not found' });
         }
-        console.log("User found:", result);
-        return res.json(result);
+        
+        res.json(result[0]);
+    });
+});
+
+app.put('/api/profile', authenticateToken, (req, res) => {
+    const userId = req.user.id;
+    const { name, email } = req.body;
+    
+ 
+    if (!name || !email) {
+        return res.status(400).json({ message: 'Name and email are required' });
+    }
+    
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ message: 'Invalid email format' });
+    }
+    
+    const sql = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
+    pool.query(sql, [name, email, userId], (err, result) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Error updating profile' });
+        }
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.json({ message: 'Profile updated successfully' });
     });
 });
 
