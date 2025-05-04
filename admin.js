@@ -38,3 +38,13 @@ app.delete('/admin/products/:id', authenticateToken, isAdmin, (req, res) => {
         res.json({ message: 'Product deleted' });
     });
 });
+
+
+app.get('/admin/profile', authenticateToken, isAdmin, (req, res) => {
+    const user_id = req.user.id;
+    pool.query('SELECT id, email, name, role FROM users WHERE id = ?', [user_id], (err, result) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (result.length === 0) return res.status(404).json({ message: 'User not found' });
+        res.json(result[0]);
+    });
+});
