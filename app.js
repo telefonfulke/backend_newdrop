@@ -290,7 +290,7 @@ app.get("/api/profile", authenticateToken, (req, res) => {
 
 //regisztracio
 app.post('/api/register', (req, res) => {
-    const { email, name, password } = req.body;
+    const { email, name, password, role } = req.body;
     const errors = [];
 
     if (!validator.isEmail(email)) {
@@ -309,13 +309,15 @@ app.post('/api/register', (req, res) => {
         return res.status(400).json({ errors });
     }
 
+    const userRole = role === 'admin' ? 'admin' : 'user';
+
     bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
             return res.status(500).json({ error: 'Hiba a hashelés során' });
         }
 
-        const sql = 'INSERT INTO users(id, email, name, password) VALUES(NULL, ?, ?, ?)';
-        pool.query(sql, [email, name, hash], (err, result) => {
+        const sql = 'INSERT INTO users(id, email, name, password, role) VALUES(NULL, ?, ?, ?, ?)';
+        pool.query(sql, [email, name, hash, userRole], (err, result) => {
             if (err) {
                 return res.status(500).json({ error: err });
             }
@@ -356,7 +358,7 @@ app.post('/api/login', (req, res) => {
         console.log(user);
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (isMatch) {
-                const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1y' });
+                const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1y' });
 
                 res.cookie('auth_token', token, {
                     httpOnly: true,
@@ -464,3 +466,23 @@ app.post('/api/logout', authenticateToken, (req, res) => {
 app.listen(PORT, () => {
     console.log(`App is running and listening on port ${PORT}`)
 })
+
+bcrypt.hash('your_admin_password', 10, (err, hash) => {
+    console.log(hash);
+});
+
+function isAdmin(req, res, next) {
+    if (req.user && req.user.role === 'admin') {
+        return next();
+    }
+    return res.status(403).json({ error: 'Admin access required' });
+}
+
+app.get('/admin/profile', authenticateToken, isAdmin, (req, res) => {
+    const user_id = req.user.id;
+    pool.query('SELECT id, email, name, role FROM users WHERE id = ?', [user_id], (err, result) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (result.length === 0) return res.status(404).json({ message: 'User not found' });
+        res.json(result[0]);
+    });
+});
