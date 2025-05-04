@@ -124,4 +124,4 @@ COMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 
 INSERT INTO users (email, name, password, role)
-VALUES ('admin@example.com', 'Admin', '<hashed_password>', 'admin');
+VALUES ('admin@example.com', 'Admin', '<$2b$10$CWTpVYprWUTbZNA/1VS72uldSLAYb28.jU/GwLMrbLCnShHEo5.g.>', 'admin');
